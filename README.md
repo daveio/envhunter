@@ -70,4 +70,4 @@ Match:
 
 ## 📝 License
 
-MIT License © 2025 Your Name
+MIT License © 2025 Dave Williams <dave@dave.io>
