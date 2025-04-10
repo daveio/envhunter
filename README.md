@@ -53,7 +53,7 @@ envhunter scan [options]
 | Option              | Description                  |
 | ------------------- | ---------------------------- |
 | `--mode`            | `repos` (default) or `gists` |
-| `--output FILENAME` | Write YAML to `FILENAME`.    |
+| `--output FILENAME` | Write YAML to `FILENAME`     |
 
 ## 📝 License
 
