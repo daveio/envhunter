@@ -7,7 +7,7 @@
 - 🔎 Searches GitHub repos or gists for `.env` files
 - 🧪 Detects `.env` variables with names containing `KEY` or `TOKEN`
 - 📈 Filters secrets based on entropy (Shannon entropy)
-- 💬 Outputs results in `terminal`, `json`, or `csv` formats
+- 💬 Outputs results to YAML file if desired
 - 🔐 Uses GitHub API (requires a Personal Access Token)
 
 ## 🔐 Authentication
