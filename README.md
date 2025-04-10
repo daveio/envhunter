@@ -10,6 +10,14 @@
 - 💬 Outputs results in `terminal`, `json`, or `csv` formats
 - 🔐 Uses GitHub API (requires a Personal Access Token)
 
+## 🔐 Authentication
+
+Set your GitHub token:
+
+```bash
+export GITHUB_TOKEN=your_token_here
+```
+
 ## 🧰 Installation
 
 ### As a Ruby Gem
@@ -42,31 +50,10 @@ envhunter scan [options]
 
 ### Options
 
-| Option     | Description                  |
-| ---------- | ---------------------------- |
-| `--mode`   | `repos` (default) or `gists` |
-| `--format` | `terminal`, `json`, or `csv` |
-
-## 🔐 Authentication
-
-Set your GitHub token:
-
-```bash
-export GITHUB_TOKEN=your_token_here
-```
-
-## 📊 Output Example
-
-```plaintext
-=== High Entropy Keys Found ===
-
-User: johndoe
-Repo/Gist: johndoe/myrepo
-File: .env
-Match:
-  API_TOKEN=abcd123...
-----------------------------------------
-```
+| Option              | Description                  |
+| ------------------- | ---------------------------- |
+| `--mode`            | `repos` (default) or `gists` |
+| `--output FILENAME` | Write YAML to `FILENAME`.    |
 
 ## 📝 License
 
