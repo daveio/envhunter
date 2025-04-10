@@ -39,7 +39,7 @@ gem install envhunter-1.0.0.gem
 
 ```bash
 docker build -t envhunter .
-docker run --rm -e GITHUB_TOKEN=your_token_here envhunter scan --mode gists --format json
+docker run --rm -e GITHUB_TOKEN=your_token_here envhunter scan --mode gists --output envhunter.yaml
 ```
 
 ## 🚀 Usage
