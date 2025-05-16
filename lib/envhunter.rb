@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'commander/import'
 require 'httparty'
 require 'json'
@@ -6,14 +8,15 @@ require 'uri'
 require 'yaml'
 
 module EnvHunter
-  extend self
+  module_function
 
-  GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || abort("Error: GITHUB_TOKEN environment variable is not set.")
+  GITHUB_TOKEN = ENV['GITHUB_TOKEN'] || abort('Error: GITHUB_TOKEN environment variable is not set.')
   ENTROPY_THRESHOLD = 4.0
   KEYWORDS = /KEY|TOKEN/
 
   def entropy(str)
     return 0.0 if str.nil? || str.empty?
+
     chars = str.each_char.group_by(&:itself).transform_values(&:count)
     probs = chars.values.map { |c| c.to_f / str.length }
     -probs.map { |p| p * Math.log2(p) }.reduce(:+) || 0.0
@@ -22,10 +25,12 @@ module EnvHunter
   def extract_env_keys(content)
     results = {}
     content.each_line do |line|
-      next unless line =~ /^\s*[\w\-]+=(.+)$/
+      next unless line =~ /^\s*[\w-]+=(.+)$/
+
       key, value = line.strip.split('=', 2)
       next unless key =~ KEYWORDS
       next if value.nil?
+
       ent = entropy(value.gsub(/['"]/, ''))
       results[key] = value if ent > ENTROPY_THRESHOLD
     end
@@ -34,33 +39,43 @@ module EnvHunter
 
   def github_search(query, mode, page = 1, per_page = 30)
     url = if mode == 'gists'
-      "https://api.github.com/gists/public?page=#{page}&per_page=#{per_page}"
-    else
-      "https://api.github.com/search/code?q=#{URI.encode_www_form_component(query)}&page=#{page}&per_page=#{per_page}"
-    end
+            "https://api.github.com/gists/public?page=#{page}&per_page=#{per_page}"
+          else
+            "https://api.github.com/search/code?q=#{URI.encode_www_form_component(query)}&page=#{page}&per_page=#{per_page}"
+          end
     headers = {
-      "Authorization" => "token #{GITHUB_TOKEN}",
-      "User-Agent" => "EnvHunter"
+      'Authorization' => "token #{GITHUB_TOKEN}",
+      'User-Agent' => 'EnvHunter'
     }
     response = HTTParty.get(url, headers: headers)
     JSON.parse(response.body)
   end
 
   def process_results(data, mode, output_file)
-    items = mode == 'gists' ? (data.is_a?(Array) ? data : []) : data['items'] || []
+    items = if mode == 'gists'
+              data.is_a?(Array) ? data : []
+            else
+              data['items'] || []
+            end
     found_count = 0
     results = []
 
     items.each do |item|
       raw_url, user, repo, file = if mode == 'gists'
-        next unless item['files']
-        file_obj = item['files'].values.find { |f| f['filename'] =~ /\.env$/ }
-        next unless file_obj
-        [file_obj['raw_url'], item['owner']['login'], "Gist: #{item['id']}", file_obj['filename']]
-      else
-        raw_url = item['html_url'].gsub('github.com', 'raw.githubusercontent.com').gsub('/blob/', '/')
-        [raw_url, item['repository']['owner']['login'], item['repository']['full_name'], item['name']]
-      end
+                                    next unless item['files']
+
+                                    file_obj = item['files'].values.find { |f| f['filename'] =~ /\.env$/ }
+                                    next unless file_obj
+
+                                    [file_obj['raw_url'], item['owner']['login'], "Gist: #{item['id']}",
+                                     file_obj['filename']]
+                                  else
+                                    raw_url = item['html_url'].gsub('github.com', 'raw.githubusercontent.com').gsub(
+                                      '/blob/', '/'
+                                    )
+                                    [raw_url, item['repository']['owner']['login'], item['repository']['full_name'],
+                                     item['name']]
+                                  end
 
       # Skip files that are likely not of interest
       next if file.downcase.include?('example')
@@ -94,7 +109,7 @@ module EnvHunter
           # Store result for YAML output if needed
           results << result if output_file
         end
-      rescue => e
+      rescue StandardError => e
         warn "Error fetching #{raw_url}: #{e}"
       end
     end
@@ -138,7 +153,7 @@ module EnvHunter
       c.option '--mode MODE', String, 'Search mode: repos or gists (default: repos)'
       c.option '--output OUTPUT', String, 'Output YAML file (optional)'
       c.option '--limit LIMIT', Integer, 'Maximum number of responses to process (default: 100)'
-      c.action do |args, options|
+      c.action do |_args, options|
         mode = options.mode == 'gists' ? 'gists' : 'code'
         output_file = options.output
         limit = options.limit || 100
@@ -157,13 +172,11 @@ module EnvHunter
             total_found += found_in_page
             all_results.concat(page_results) if output_file
 
-            if limit && total_found >= limit
-              break
-            end
+            break if limit && total_found >= limit
 
             page += 1
-            print "." # Progress indicator
-            STDOUT.flush
+            print '.' # Progress indicator
+            $stdout.flush
           end
         rescue Interrupt
           puts "\nSearch interrupted by user"
